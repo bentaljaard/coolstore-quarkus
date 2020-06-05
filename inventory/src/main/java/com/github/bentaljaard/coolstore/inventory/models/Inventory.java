@@ -1,4 +1,4 @@
-package com.github.bentaljaard.coolstore.inventory.inventory.models;
+package com.github.bentaljaard.coolstore.inventory.models;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
 

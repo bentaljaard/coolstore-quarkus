@@ -1,6 +1,6 @@
-package com.github.bentaljaard.coolstore.inventory.inventory.api;
+package com.github.bentaljaard.coolstore.inventory.api;
 
-import com.github.bentaljaard.coolstore.inventory.inventory.models.Inventory;
+import com.github.bentaljaard.coolstore.inventory.models.Inventory;
 
 import javax.ws.rs.NotFoundException;
 import java.util.List;

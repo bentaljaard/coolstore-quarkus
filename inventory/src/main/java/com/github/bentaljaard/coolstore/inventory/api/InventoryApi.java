@@ -1,4 +1,4 @@
-package com.github.bentaljaard.coolstore.inventory.inventory.api;
+package com.github.bentaljaard.coolstore.inventory.api;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -11,12 +11,14 @@ import javax.ws.rs.core.Response;
 @Path("availability")
 public class InventoryApi {
 
-    @Inject InventoryService service;
+    @Inject
+    InventoryService service;
 
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAvailability(@PathParam("id") String id) {
+
         return Response.ok(service.getInventory(id)).build();
     }
 
