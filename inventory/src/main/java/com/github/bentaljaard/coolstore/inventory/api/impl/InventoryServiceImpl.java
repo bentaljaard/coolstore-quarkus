@@ -13,7 +13,7 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     public Inventory getInventory(String id) throws NotFoundException {
         Inventory results = Inventory.findById(Long.parseLong(id));
-        return Inventory.findById(Long.parseLong(id));
+        return results;
     }
 
     @Override

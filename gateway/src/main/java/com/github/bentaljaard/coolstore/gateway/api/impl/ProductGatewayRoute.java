@@ -1,8 +1,6 @@
 package com.github.bentaljaard.coolstore.gateway.api.impl;
 
 import java.util.Collections;
-import java.util.List;
-
 import com.github.bentaljaard.coolstore.gateway.models.Inventory;
 import com.github.bentaljaard.coolstore.gateway.models.Product;
 
@@ -31,17 +29,18 @@ public class ProductGatewayRoute extends RouteBuilder {
                 .id("productRoute")
                 .streamCaching("true")
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
-                .recipientList(simple("http://localhost:8081/products?httpMethod=GET")).end()
-                .log("${body}")
+                .circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(2000).end()
+                        .recipientList(simple("http://localhost:8081/products?httpMethod=GET")).end()
+                .onFallback()
+                        .to("direct:productFallback")
+                .end()
                 .choice()
                         .when(body().isNull())
                         .to("direct:productFallback")
                         .end()
-                .log("${body}")
                 .unmarshal(productFormat)
                 .split(body()).parallelProcessing().streaming()
                 .enrich("direct:inventory", new InventoryEnricher())
-                // .log("${body}")
                 .end();
 
                 from("direct:productFallback")
@@ -49,19 +48,19 @@ public class ProductGatewayRoute extends RouteBuilder {
                 .id("ProductFallbackRoute")
                 .transform()
                 .constant(Collections.singletonList(new Product(0L, "Unavailable Product", "Unavailable Product", 0, null)));
-                //.marshal().json(JsonLibrary.Jackson, List.class);
 
 
 
                 from("direct:inventory")
                 .id("inventoryRoute")
                 .streamCaching("true")
-                .log("${body.id}")
                 .setHeader("id", simple("${body.id}")) 
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
-                .recipientList(simple("http://localhost:8082/availability/${header.id}?httpMethod=GET")).end()
-                .log("${body}")
-                .log("Checking if Body is null")
+                .circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(2000).end()
+                        .recipientList(simple("http://localhost:8082/availability/${header.id}?httpMethod=GET")).end()
+                .onFallback()
+                        .to("direct:inventoryFallback") 
+                .end()
                 .choice().when().simple("${body} == ''")
                         .log("Body is null")
                         .to("direct:inventoryFallback")              
