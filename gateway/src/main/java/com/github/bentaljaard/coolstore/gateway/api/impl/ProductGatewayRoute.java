@@ -1,6 +1,7 @@
 package com.github.bentaljaard.coolstore.gateway.api.impl;
 
 import java.util.Collections;
+
 import com.github.bentaljaard.coolstore.gateway.models.Inventory;
 import com.github.bentaljaard.coolstore.gateway.models.Product;
 
@@ -12,6 +13,7 @@ import org.apache.camel.component.jackson.ListJacksonDataFormat;
 import org.apache.camel.model.dataformat.JsonLibrary;
 
 public class ProductGatewayRoute extends RouteBuilder {
+
 
 	@Override
 	public void configure() throws Exception {
@@ -30,7 +32,7 @@ public class ProductGatewayRoute extends RouteBuilder {
                 .streamCaching("true")
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
                 .circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(2000).end()
-                        .recipientList(simple("http://localhost:8081/products?httpMethod=GET")).end()
+                        .recipientList(simple("{{catalog.endpoint}}/products?httpMethod=GET")).end()
                 .onFallback()
                         .to("direct:productFallback")
                 .end()
@@ -57,7 +59,7 @@ public class ProductGatewayRoute extends RouteBuilder {
                 .setHeader("id", simple("${body.id}")) 
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
                 .circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(2000).end()
-                        .recipientList(simple("http://localhost:8082/availability/${header.id}?httpMethod=GET")).end()
+                        .recipientList(simple("{{inventory.endpoint}}/availability/${header.id}?httpMethod=GET")).end()
                 .onFallback()
                         .to("direct:inventoryFallback") 
                 .end()

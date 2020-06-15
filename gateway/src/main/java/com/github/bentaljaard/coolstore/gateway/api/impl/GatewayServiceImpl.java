@@ -1,6 +1,5 @@
 package com.github.bentaljaard.coolstore.gateway.api.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
