@@ -1,3 +1,10 @@
 *.iml
 */lsp
 target
+.settings
+.vscode
+.factorypath
+*/out
+.dockerignore
+.classpath
+.project
