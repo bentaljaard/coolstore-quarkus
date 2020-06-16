@@ -1,5 +1,8 @@
 package com.github.bentaljaard.coolstore.catalog.api;
 
+import java.util.List;
+import java.util.Random;
+
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -32,6 +35,18 @@ public class CatalogAPI {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response addProduct(Product newProduct) {
         return Response.accepted(service.add(newProduct)).header("instanceName", hostname ).build();
+    }
+
+    // As a fallback method, just return a static list of our products from the sample data file
+    private Response staticProductList() {
+        List<Product> productList = service.staticList();
+        return Response.ok(productList).build();
+    }
+
+    private void possibleFail() {
+        if(new Random().nextFloat() < 0.5f){
+            throw new RuntimeException("Resource failure");
+        }
     }
 
 }

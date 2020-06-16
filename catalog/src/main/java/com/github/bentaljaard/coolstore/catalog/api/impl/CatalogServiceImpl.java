@@ -3,6 +3,7 @@ package com.github.bentaljaard.coolstore.catalog.api.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
@@ -19,6 +20,8 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
 public class CatalogServiceImpl implements CatalogService {
+    
+    private static final Logger LOGGER = Logger.getLogger(CatalogServiceImpl.class.getName());
 
     @Inject
     MongoClient mongoClient;
@@ -97,6 +100,10 @@ public class CatalogServiceImpl implements CatalogService {
             add(curProduct);
         }
         return bulkProducts;
+    }
+    public List<Product> staticList(){
+        LOGGER.info("Retrieved product catalog list using fallback method");
+        return dataFromFile(filename);
     }
 
 }
