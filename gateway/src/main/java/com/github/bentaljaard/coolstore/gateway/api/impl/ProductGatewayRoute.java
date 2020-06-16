@@ -29,12 +29,10 @@ public class ProductGatewayRoute extends RouteBuilder {
                 .id("productRoute")
                 .streamCaching("true")
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
-                // .circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(2000).end()
-                        .recipientList(simple("{{catalog.endpoint}}/products?httpMethod=GET")).end()
-                        .log("**** Product service instance: ${headers.instanceName}")
-                // .onFallback()
-                //         .to("direct:productFallback")
-                // .end()
+                        
+                .recipientList(simple("{{catalog.endpoint}}/products?httpMethod=GET")).end()
+                .log("**** Product service instance: ${headers.instanceName}")
+                
                 .choice()
                         .when(body().isNull()) 
                         //No products returned, default to fallback product
@@ -59,16 +57,16 @@ public class ProductGatewayRoute extends RouteBuilder {
                 //Retrieve inventory for a product
                 from("direct:inventory")
                 .id("inventoryRoute")
+                .log("Inventory invoked")
                 .streamCaching("true")
                 .setHeader("id", simple("${body.id}")) 
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
-                // .circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(2000).end()
-                        .recipientList(simple("{{inventory.endpoint}}/availability/${header.id}?httpMethod=GET")).end()
-                        .log("**** Inventory service instance: ${headers.instanceName}")
-                // .onFallback()
-                        // .to("direct:inventoryFallback") 
-                // .end()
-                .choice().when().simple("${body} == ''")
+                        
+                .recipientList(simple("{{inventory.endpoint}}/availability/${header.id}?httpMethod=GET")).end()
+                .log("**** Inventory service instance: ${headers.instanceName}")
+              
+                .log("${body}")
+                .choice().when().simple("${body} == '' || ${body} == null")
                         .log("No availability found for the product")
                         .to("direct:inventoryFallback")              
                 .end()
