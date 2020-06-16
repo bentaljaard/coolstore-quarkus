@@ -18,12 +18,7 @@ public class ProductGatewayRoute extends RouteBuilder {
 	@Override
 	public void configure() throws Exception {
 
-                // try {
-                //         getContext().setTracing(true);
-                //     } catch (Exception e) {
-                //         e.printStackTrace();
-                //     }
-        
+              
                 JacksonDataFormat productFormat = new ListJacksonDataFormat();
                 productFormat.setUnmarshalType(Product.class);
 
@@ -33,6 +28,7 @@ public class ProductGatewayRoute extends RouteBuilder {
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
                 .circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(2000).end()
                         .recipientList(simple("{{catalog.endpoint}}/products?httpMethod=GET")).end()
+                        .log("${headers}")
                 .onFallback()
                         .to("direct:productFallback")
                 .end()
@@ -99,5 +95,3 @@ public class ProductGatewayRoute extends RouteBuilder {
 
     
 }
-
-//.recipientList(simple("http4://{{env:CATALOG_ENDPOINT:catalog:8080}}/api/products")).end()

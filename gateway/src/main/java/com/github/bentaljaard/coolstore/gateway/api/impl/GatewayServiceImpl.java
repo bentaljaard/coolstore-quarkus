@@ -15,12 +15,11 @@ public class GatewayServiceImpl implements GatewayService {
 
     @Inject ProducerTemplate producer;
 
-	@Override
+    @Override
+    @SuppressWarnings("unchecked")
 	public List<Product> getProducts() {
         return (List<Product>) producer.requestBody("direct:products_getAll", "");
-        // ArrayList<Product> products = new ArrayList();
-        // products.add(new Product(0L,"test product", "unavailable product", 0.0, null));
-		// return products;
+       
 	}
     
 }
