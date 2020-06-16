@@ -81,7 +81,7 @@
     </dependency>
     <dependency>
       <groupId>org.apache.camel.quarkus</groupId>
-      <artifactId>camel-quarkus-opentracing</artifactId>
+      <artifactId>camel-quarkus-microprofile-health</artifactId>
     </dependency>
   </dependencies>
   <build>

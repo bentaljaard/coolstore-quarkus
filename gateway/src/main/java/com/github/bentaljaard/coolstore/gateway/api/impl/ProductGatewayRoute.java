@@ -49,8 +49,8 @@ public class ProductGatewayRoute extends RouteBuilder {
                 // Product fallback route
 
                 from("direct:productFallback")
+                .id("productFallbackRoute")
                 .log("Invoking product fallback")
-                .id("ProductFallbackRoute")
                 .transform()
                 .constant(Collections.singletonList(new Product(0L, "Unavailable Product", "Unavailable Product", 0, null)))
                 .marshal(productFormat);
