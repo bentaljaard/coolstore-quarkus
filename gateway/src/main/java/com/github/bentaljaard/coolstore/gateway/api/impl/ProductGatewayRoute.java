@@ -11,7 +11,9 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.apache.camel.component.jackson.ListJacksonDataFormat;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.eclipse.microprofile.opentracing.Traced;
 
+@Traced
 public class ProductGatewayRoute extends RouteBuilder {
 
 
