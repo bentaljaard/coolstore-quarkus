@@ -8,3 +8,4 @@ target
 .dockerignore
 .classpath
 .project
+*/.mvn
