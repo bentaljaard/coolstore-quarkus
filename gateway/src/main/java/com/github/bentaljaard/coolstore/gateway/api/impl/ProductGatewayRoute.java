@@ -29,10 +29,10 @@ public class ProductGatewayRoute extends RouteBuilder {
                 .id("productRoute")
                 .streamCaching("true")
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
-                        
-                .recipientList(simple("{{catalog.endpoint}}/products?httpMethod=GET")).end()
-                .log("**** Product service instance: ${headers.instanceName}")
-                
+                .circuitBreaker()        
+                        .recipientList(simple("{{catalog.endpoint}}/products?httpMethod=GET")).end()
+                        .log("**** Product service instance: ${headers.instanceName}")
+                .onFallback().to("direct:productFallback").end()
                 .choice()
                         .when(body().isNull()) 
                         //No products returned, default to fallback product
@@ -61,10 +61,10 @@ public class ProductGatewayRoute extends RouteBuilder {
                 .streamCaching("true")
                 .setHeader("id", simple("${body.id}")) 
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
-                        
-                .recipientList(simple("{{inventory.endpoint}}/availability/${header.id}?httpMethod=GET")).end()
-                .log("**** Inventory service instance: ${headers.instanceName}")
-              
+                .circuitBreaker()        
+                        .recipientList(simple("{{inventory.endpoint}}/availability/${header.id}?httpMethod=GET")).end()
+                        .log("**** Inventory service instance: ${headers.instanceName}")
+                .onFallback().to("direct:inventoryFallback").end()
                 .log("${body}")
                 .choice().when().simple("${body} == '' || ${body} == null")
                         .log("No availability found for the product")
