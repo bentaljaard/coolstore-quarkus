@@ -16,7 +16,9 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.opentracing.Traced;
 
+@Traced
 @ApplicationScoped
 public class CatalogServiceImpl implements CatalogService {
 

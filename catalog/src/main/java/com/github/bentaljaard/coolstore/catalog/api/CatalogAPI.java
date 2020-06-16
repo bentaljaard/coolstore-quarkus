@@ -12,7 +12,9 @@ import javax.ws.rs.core.Response;
 import com.github.bentaljaard.coolstore.catalog.models.Product;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.opentracing.Traced;
 
+@Traced
 @Path("/products")
 public class CatalogAPI {
 
