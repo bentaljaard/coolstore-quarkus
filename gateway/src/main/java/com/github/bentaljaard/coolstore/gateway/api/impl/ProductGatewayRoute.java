@@ -22,18 +22,22 @@ public class ProductGatewayRoute extends RouteBuilder {
                 JacksonDataFormat productFormat = new ListJacksonDataFormat();
                 productFormat.setUnmarshalType(Product.class);
 
+                
+                // Main products api that enriches the response with availabilty details
+
                 from("direct:products_getAll")
                 .id("productRoute")
                 .streamCaching("true")
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
-                .circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(2000).end()
+                // .circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(2000).end()
                         .recipientList(simple("{{catalog.endpoint}}/products?httpMethod=GET")).end()
-                        .log("${headers}")
-                .onFallback()
-                        .to("direct:productFallback")
-                .end()
+                        .log("**** Product service instance: ${headers.instanceName}")
+                // .onFallback()
+                //         .to("direct:productFallback")
+                // .end()
                 .choice()
-                        .when(body().isNull())
+                        .when(body().isNull()) 
+                        //No products returned, default to fallback product
                         .to("direct:productFallback")
                         .end()
                 .unmarshal(productFormat)
@@ -41,34 +45,40 @@ public class ProductGatewayRoute extends RouteBuilder {
                 .enrich("direct:inventory", new InventoryEnricher())
                 .end();
 
+                
+                // Product fallback route
+
                 from("direct:productFallback")
                 .log("Invoking product fallback")
                 .id("ProductFallbackRoute")
                 .transform()
-                .constant(Collections.singletonList(new Product(0L, "Unavailable Product", "Unavailable Product", 0, null)));
+                .constant(Collections.singletonList(new Product(0L, "Unavailable Product", "Unavailable Product", 0, null)))
+                .marshal(productFormat);
 
 
-
+                //Retrieve inventory for a product
                 from("direct:inventory")
                 .id("inventoryRoute")
                 .streamCaching("true")
                 .setHeader("id", simple("${body.id}")) 
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
-                .circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(2000).end()
+                // .circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(2000).end()
                         .recipientList(simple("{{inventory.endpoint}}/availability/${header.id}?httpMethod=GET")).end()
-                .onFallback()
-                        .to("direct:inventoryFallback") 
-                .end()
+                        .log("**** Inventory service instance: ${headers.instanceName}")
+                // .onFallback()
+                        // .to("direct:inventoryFallback") 
+                // .end()
                 .choice().when().simple("${body} == ''")
-                        .log("Body is null")
+                        .log("No availability found for the product")
                         .to("direct:inventoryFallback")              
                 .end()
                 .setHeader("CamelJacksonUnmarshalType", simple(Inventory.class.getName()))
                 .unmarshal().json(JsonLibrary.Jackson, Inventory.class);
 
+                //Inventory fallback route
                 from("direct:inventoryFallback")
                 .id("inventoryFallbackRoute")
-                .log("Inventory fallback invoked")
+                .log("Inventory fallback invoked - setting 0 availability")
                 .transform()
                 .constant(new Inventory(0L, 0, "Local Store", "http://developers.redhat.com"))
                 .marshal().json(JsonLibrary.Jackson, Inventory.class);
