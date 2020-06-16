@@ -5,6 +5,7 @@ import org.bson.codecs.pojo.annotations.BsonId;
 
 public class Product extends PanacheMongoEntityBase {
 
+    //We override the object id, so that we can control what value is used
     @BsonId
     public Long id;
 

@@ -9,4 +9,6 @@ public interface CatalogService {
     public List<Product> list()
             throws NotFoundException;
     public Product add(Product newProduct);
+
+
 }
