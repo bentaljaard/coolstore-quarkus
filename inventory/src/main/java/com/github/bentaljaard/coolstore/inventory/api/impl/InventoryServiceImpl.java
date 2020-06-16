@@ -7,6 +7,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.NotFoundException;
 import java.util.List;
 
+
 @ApplicationScoped
 public class InventoryServiceImpl implements InventoryService {
 
