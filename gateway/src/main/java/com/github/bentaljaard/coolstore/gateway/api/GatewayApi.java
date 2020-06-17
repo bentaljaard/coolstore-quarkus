@@ -7,6 +7,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.eclipse.microprofile.opentracing.Traced;
 
 @Traced
@@ -18,6 +20,7 @@ public class GatewayApi {
     @GET
     @Path("products")
     @Produces(MediaType.APPLICATION_JSON)
+    @Timed(name = "ListEnrichedProductsTimer", description = "A measure of how long it takes to retrieve a list of products", unit = MetricUnits.MILLISECONDS)
     public Response getProducts() {
         return Response.ok(service.getProducts()).build();
     }

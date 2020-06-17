@@ -22,7 +22,7 @@ scrape_configs:
   static_configs:
   - targets:
     - localhost:9090
-- job_name: product
+- job_name: coolstore-local
   honor_timestamps: true
   scrape_interval: 15s
   scrape_timeout: 10s
@@ -31,6 +31,8 @@ scrape_configs:
   static_configs:
   - targets:
     - localhost:8080
+    - localhost:8081
+    - localhost:8082
 EOF
 
 docker run -it --network="host" --rm -p 9090:9090 -v /tmp/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus

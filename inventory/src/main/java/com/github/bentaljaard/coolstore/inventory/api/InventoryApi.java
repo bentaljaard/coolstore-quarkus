@@ -9,7 +9,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.annotation.Timed;
+import org.eclipse.microprofile.opentracing.Traced;
 
+@Traced
 @Path("availability")
 public class InventoryApi {
 
@@ -23,6 +27,7 @@ public class InventoryApi {
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
+    @Timed(name = "AvailabilityCheckTimer", description = "A measure of how long it takes to retrieve product availability", unit = MetricUnits.MILLISECONDS)
     public Response getAvailability(@PathParam("id") String id) {
 
         return Response.ok(service.getInventory(id)).header("instanceName", hostname ).build();
@@ -30,6 +35,7 @@ public class InventoryApi {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Timed(name = "AvailabilityListTimer", description = "A measure of how long it takes to retrieve product availability", unit = MetricUnits.MILLISECONDS)
     public Response getAvailabilityAll() {
         return Response.ok(service.getInventoryAll()).header("instanceName", hostname ).build();
     }

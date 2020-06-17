@@ -29,6 +29,7 @@ public class ProductGatewayRoute extends RouteBuilder {
 
                 from("direct:products_getAll")
                 .id("productRoute")
+                .to("microprofile-metrics:timer:productRoute.timer?action=start")
                 .streamCaching("true")
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
                 .circuitBreaker()        
@@ -43,7 +44,8 @@ public class ProductGatewayRoute extends RouteBuilder {
                 .unmarshal(productFormat)
                 .split(body()).parallelProcessing().streaming()
                 .enrich("direct:inventory", new InventoryEnricher())
-                .end();
+                .end()
+                .to("microprofile-metrics:timer:productRoute.timer?action=stop");
 
                 
                 // Product fallback route
@@ -59,6 +61,7 @@ public class ProductGatewayRoute extends RouteBuilder {
                 //Retrieve inventory for a product
                 from("direct:inventory")
                 .id("inventoryRoute")
+                .to("microprofile-metrics:timer:inventoryRoute.timer?action=start")
                 .log("Inventory invoked")
                 .streamCaching("true")
                 .setHeader("id", simple("${body.id}")) 
@@ -73,7 +76,8 @@ public class ProductGatewayRoute extends RouteBuilder {
                         .to("direct:inventoryFallback")              
                 .end()
                 .setHeader("CamelJacksonUnmarshalType", simple(Inventory.class.getName()))
-                .unmarshal().json(JsonLibrary.Jackson, Inventory.class);
+                .unmarshal().json(JsonLibrary.Jackson, Inventory.class)
+                .to("microprofile-metrics:timer:inventoryRoute.timer?action=stop");
 
                 //Inventory fallback route
                 from("direct:inventoryFallback")
