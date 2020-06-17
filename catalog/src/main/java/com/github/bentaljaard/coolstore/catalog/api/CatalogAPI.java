@@ -12,6 +12,8 @@ import javax.ws.rs.core.Response;
 import com.github.bentaljaard.coolstore.catalog.models.Product;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.eclipse.microprofile.opentracing.Traced;
 
 @Traced
@@ -26,12 +28,14 @@ public class CatalogAPI {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
+    @Timed(name = "ProductListTimer", description = "A measure of how long it takes to retrieve a list of products", unit = MetricUnits.MILLISECONDS)
     public Response listProducts() {
         return Response.ok(service.list()).header("instanceName", hostname ).build();
     }
 
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
+    @Timed(name = "ProductAddTimer", description = "A measure of how long it takes to add a product", unit = MetricUnits.MILLISECONDS)
     public Response addProduct(Product newProduct) {
         return Response.accepted(service.add(newProduct)).header("instanceName", hostname ).build();
     }
