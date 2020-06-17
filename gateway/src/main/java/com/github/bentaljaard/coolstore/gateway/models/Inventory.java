@@ -1,6 +1,8 @@
 package com.github.bentaljaard.coolstore.gateway.models;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
 
+@RegisterForReflection
 public class Inventory {
     public Long id;
     public int quantity;
@@ -8,7 +10,7 @@ public class Inventory {
     public String link;
 
     public Inventory() {
-
+		super();
 	}
 
 	public Inventory(Long id, int quantity, String location, String link) {

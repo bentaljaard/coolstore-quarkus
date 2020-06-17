@@ -1,5 +1,8 @@
 package com.github.bentaljaard.coolstore.gateway.models;
 
+import io.quarkus.runtime.annotations.RegisterForReflection;
+
+@RegisterForReflection
 public class Product {
 
     public Long id;
@@ -9,7 +12,7 @@ public class Product {
     public Inventory availability;
     
     public Product() {
-
+		super();
 	}
 	public Product(Long id, String name, String description, double price, Inventory availability) {
 		this.id = id;
