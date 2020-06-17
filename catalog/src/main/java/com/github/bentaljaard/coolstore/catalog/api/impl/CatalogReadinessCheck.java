@@ -11,7 +11,7 @@ import org.eclipse.microprofile.health.Readiness;
 public class CatalogReadinessCheck implements HealthCheck{
     @Override
     public HealthCheckResponse call() {
-        // return HealthCheckResponse.named("Custom readiness check").up().build();
-        return HealthCheckResponse.named("Custom readiness check").down().build();
+        return HealthCheckResponse.named("Custom readiness check").up().build();
+        // return HealthCheckResponse.named("Custom readiness check").down().build();
     }
 }

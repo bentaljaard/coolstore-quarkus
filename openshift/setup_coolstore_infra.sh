@@ -41,6 +41,10 @@ oc patch dc/coolstore-catalog -n ${namespace} -p '{"spec":{"template":{"spec":{"
 oc expose dc/coolstore-catalog -n ${namespace} --port=8080
 oc expose svc/coolstore-catalog -n ${namespace} 
 
+# Set health checks
+oc set probe dc/coolstore-catalog -n ${namespace} --liveness --failure-threshold 3 --initial-delay-seconds 6 --get-url=http://:8080/health/live
+oc set probe dc/coolstore-catalog -n ${namespace} --readiness --failure-threshold 3 --initial-delay-seconds 6 --get-url=http://:8080/health/ready
+
 # To start jvm build from your machine:
 # mvn clean package
 # oc start-build coolstore-catalog --from-dir=. --follow
@@ -69,6 +73,10 @@ oc patch dc/coolstore-inventory -n ${namespace} -p '{"spec":{"template":{"spec":
 oc expose dc/coolstore-inventory -n ${namespace} --port=8080
 oc expose svc/coolstore-inventory -n ${namespace} 
 
+oc set probe dc/coolstore-inventory -n ${namespace} --liveness --failure-threshold 3 --initial-delay-seconds 6 --get-url=http://:8080/health/live
+oc set probe dc/coolstore-inventory -n ${namespace} --readiness --failure-threshold 3 --initial-delay-seconds 6 --get-url=http://:8080/health/ready
+
+
 # To start jvm build from your machine:
 # mvn clean package
 # oc start-build coolstore-inventory --from-dir=. --follow
@@ -93,6 +101,9 @@ oc new-app -n ${namespace} --image-stream=coolstore-gateway:latest -l app=coolst
 oc patch dc/coolstore-gateway -n ${namespace} -p '{"spec":{"template":{"spec":{"containers":[{"name":"coolstore-gateway","env":[{"name":"QUARKUS_HTTP_PORT", "value":"8080"},{"name":"CATALOG_ENDPOINT", "value":"http://coolstore-catalog:8080"},{"name":"INVENTORY_ENDPOINT", "value":"http://coolstore-inventory:8080"},{"name":"QUARKUS_JAEGER_ENDPOINT", "value":"http://jaeger-collector:14268/api/traces"}]}]}}}}'
 oc expose dc/coolstore-gateway -n ${namespace} --port=8080
 oc expose svc/coolstore-gateway -n ${namespace} 
+
+oc set probe dc/coolstore-gateway -n ${namespace} --liveness --failure-threshold 3 --initial-delay-seconds 6 --get-url=http://:8080/health/live
+oc set probe dc/coolstore-gateway -n ${namespace} --readiness --failure-threshold 3 --initial-delay-seconds 6 --get-url=http://:8080/health/ready
 
 # To start jvm build from your machine:
 # mvn clean package
