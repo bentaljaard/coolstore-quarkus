@@ -1,5 +1,5 @@
-Red Hat Cool Store Microservice Demo 
-====================================
+Red Hat Cool Store Microservice Demo (Quarkus)
+===============================================
 This is an example demo showing a retail store consisting of several microservices based on Quarkus
 
 It demonstrates how to wire up small microservices into a larger application using microservice architectural principals.
