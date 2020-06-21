@@ -22,7 +22,24 @@ if [ -z ${namespace} ]; then
 fi
 
 
-oc new-project ${namespace}
+ensure_namespace_exists() {
+  oc get project $1
+  if [ $? -eq 0 ]
+  then
+    echo "Namespace exists"
+  else
+    echo "Namespace does not exist, creating..."
+    oc new-project $1
+  fi
+
+  if [ $? -eq 0 ]
+  then
+    return 0
+  fi  
+}
+
+ensure_namespace_exists ${namespace}
+
 
 # Deploy Jaeger instance
 oc process -f https://raw.githubusercontent.com/jaegertracing/jaeger-openshift/master/all-in-one/jaeger-all-in-one-template.yml | oc apply -n ${namespace} -f -
