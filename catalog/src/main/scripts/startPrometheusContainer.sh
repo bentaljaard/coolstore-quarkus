@@ -31,6 +31,8 @@ scrape_configs:
   static_configs:
   - targets:
     - localhost:8080
+    - localhost:8081
+    - localhost:8082
 EOF
 
 docker run -it --network="host" --rm -p 9090:9090 -v /tmp/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus
