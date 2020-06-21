@@ -61,7 +61,10 @@ oc expose svc/coolstore-catalog -n ${namespace}
 
 # Set health checks
 oc set probe dc/coolstore-catalog -n ${namespace} --liveness --failure-threshold 3 --initial-delay-seconds 6 --get-url=http://:8080/health/live
-oc set probe dc/coolstore-catalog -n ${namespace} --readiness --failure-threshold 3 --initial-delay-seconds 6 --get-url=http://:8080/health/ready
+
+# Note there is currently a bug on the mongoDB health check that prevents this check from working with the openshift mongo template
+# https://github.com/quarkusio/quarkus/issues/10119
+#oc set probe dc/coolstore-catalog -n ${namespace} --readiness --failure-threshold 3 --initial-delay-seconds 6 --get-url=http://:8080/health/ready
 
 # Set Resource Limits
 oc set resources dc/coolstore-catalog -n ${namespace} --limits=memory=250Mi --requests=memory=200Mi
