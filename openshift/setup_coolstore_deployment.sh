@@ -69,6 +69,11 @@ oc set probe dc/coolstore-catalog -n ${namespace} --liveness --failure-threshold
 # Set Resource Limits
 oc set resources dc/coolstore-catalog -n ${namespace} --limits=memory=250Mi --requests=memory=200Mi
 
+# Add annotations to allow prometheus to scrape metrics. Note this is the old way of doing this, prometheus instances deployed using operators use a service monitor object to configure the scrape targets
+oc oc annotate svc/coolstore-catalog -n ${namespace} prometheus.io/scrape=true
+
+
+
 # To start jvm build from your machine:
 # mvn clean package
 # oc start-build coolstore-catalog --from-dir=. --follow
@@ -103,6 +108,9 @@ oc set probe dc/coolstore-inventory -n ${namespace} --readiness --failure-thresh
 # Set Resource Limits
 oc set resources dc/coolstore-inventory -n ${namespace} --limits=memory=250Mi --requests=memory=200Mi
 
+# Add annotations to allow prometheus to scrape metrics. Note this is the old way of doing this, prometheus instances deployed using operators use a service monitor object to configure the scrape targets
+oc oc annotate svc/coolstore-inventory -n ${namespace} prometheus.io/scrape=true
+
 # To start jvm build from your machine:
 # mvn clean package
 # oc start-build coolstore-inventory --from-dir=. --follow
@@ -133,6 +141,9 @@ oc set probe dc/coolstore-gateway -n ${namespace} --readiness --failure-threshol
 
 # Set Resource Limits
 oc set resources dc/coolstore-gateway -n ${namespace} --limits=memory=250Mi --requests=memory=200Mi
+
+# Add annotations to allow prometheus to scrape metrics. Note this is the old way of doing this, prometheus instances deployed using operators use a service monitor object to configure the scrape targets
+oc oc annotate svc/coolstore-gateway -n ${namespace} prometheus.io/scrape=true
 
 # To start jvm build from your machine:
 # mvn clean package
