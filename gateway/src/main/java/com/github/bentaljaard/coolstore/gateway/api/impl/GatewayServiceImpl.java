@@ -9,7 +9,9 @@ import com.github.bentaljaard.coolstore.gateway.api.GatewayService;
 import com.github.bentaljaard.coolstore.gateway.models.Product;
 
 import org.apache.camel.ProducerTemplate;
+import org.eclipse.microprofile.opentracing.Traced;
 
+@Traced
 @ApplicationScoped
 public class GatewayServiceImpl implements GatewayService {
 
