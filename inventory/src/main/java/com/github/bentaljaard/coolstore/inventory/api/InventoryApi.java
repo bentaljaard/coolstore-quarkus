@@ -1,5 +1,7 @@
 package com.github.bentaljaard.coolstore.inventory.api;
 
+import java.util.Random;
+
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -29,7 +31,7 @@ public class InventoryApi {
     @Produces(MediaType.APPLICATION_JSON)
     @Timed(name = "AvailabilityCheckTimer", description = "A measure of how long it takes to retrieve product availability", unit = MetricUnits.MILLISECONDS)
     public Response getAvailability(@PathParam("id") String id) {
-
+        //randomDelay();
         return Response.ok(service.getInventory(id)).header("instanceName", hostname ).build();
     }
 
@@ -41,4 +43,14 @@ public class InventoryApi {
     }
 
     //Currently no create/update methods are implemented as part of the demos
+
+    //Hack method to introduce occasional timeouts
+    private void randomDelay() {
+        try {
+            Thread.sleep(new Random().nextInt(3000));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
 }

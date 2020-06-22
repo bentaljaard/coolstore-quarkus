@@ -17,10 +17,13 @@ import com.mongodb.client.MongoDatabase;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.opentracing.Traced;
+import org.jboss.logmanager.Logger;
 
 @Traced
 @ApplicationScoped
 public class CatalogServiceImpl implements CatalogService {
+
+    private static final Logger LOG = Logger.getLogger("CatalogServiceImpl");
 
     @Inject
     MongoClient mongoClient;
@@ -34,6 +37,7 @@ public class CatalogServiceImpl implements CatalogService {
 
     @Override
     public List<Product> list() {
+        LOG.info("Return product listing");
         return Product.listAll();
     }
 
@@ -53,6 +57,7 @@ public class CatalogServiceImpl implements CatalogService {
 
         product.persist();
         product.update();
+        LOG.info("Added product " + product.id);
         return product;
     }
 
@@ -73,6 +78,7 @@ public class CatalogServiceImpl implements CatalogService {
 
         //Load sample data for demo
         addBulk(dataFromFile(filename));
+        LOG.info("Loaded sample product data");
     }
 
 

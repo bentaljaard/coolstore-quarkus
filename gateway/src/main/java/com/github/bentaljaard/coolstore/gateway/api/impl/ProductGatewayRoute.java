@@ -11,9 +11,8 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.apache.camel.component.jackson.ListJacksonDataFormat;
 import org.apache.camel.model.dataformat.JsonLibrary;
-import org.eclipse.microprofile.opentracing.Traced;
+import org.apache.camel.spi.CircuitBreakerConstants;
 
-@Traced
 public class ProductGatewayRoute extends RouteBuilder {
 
 
@@ -32,8 +31,8 @@ public class ProductGatewayRoute extends RouteBuilder {
                 .to("microprofile-metrics:timer:productRoute.timer?action=start")
                 .streamCaching("true")
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
-                .circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(2000).end()        
-                        .recipientList(simple("{{catalog.endpoint}}/products?httpMethod=GET")).end()
+                .circuitBreaker()       
+                        .toD("{{catalog.endpoint}}/products?httpMethod=GET")
                         .log("**** Product service instance: ${headers.instanceName}")
                 .onFallback().to("direct:productFallback").end()
                 .choice()
@@ -62,17 +61,21 @@ public class ProductGatewayRoute extends RouteBuilder {
                 from("direct:inventory")
                 .id("inventoryRoute")
                 .to("microprofile-metrics:timer:inventoryRoute.timer?action=start")
-                .log("Inventory invoked")
+                .log("Inventory invoked to check availability for ${body.id}")
                 .streamCaching("true")
                 .setHeader("id", simple("${body.id}")) 
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
                 .circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(2000).end()        
-                        .recipientList(simple("{{inventory.endpoint}}/availability/${header.id}?httpMethod=GET")).end()
+                        .toD("{{inventory.endpoint}}/availability/${header.id}?httpMethod=GET&socketTimeout=20005")
                         .log("**** Inventory service instance: ${headers.instanceName}")
-                .onFallback().to("direct:inventoryFallback").end()
-                .log("${body}")
+                .onFallback()
+                        .log("==== ${exception.message}")
+                        .log("==== CircuitBreakerOpen: ${exchangeProperty" + CircuitBreakerConstants.RESPONSE_SHORT_CIRCUITED + "}")
+                        .to("direct:inventoryFallback")
+                        .end()
+                
                 .choice().when().simple("${body} == '' || ${body} == null")
-                        .log("No availability found for the product")
+                        .log("No availability found for the product ${header.id}")
                         .to("direct:inventoryFallback")              
                 .end()
                 .setHeader("CamelJacksonUnmarshalType", simple(Inventory.class.getName()))
@@ -100,7 +103,6 @@ public class ProductGatewayRoute extends RouteBuilder {
                 Inventory i = resource.getIn().getBody(Inventory.class);
                 p.setAvailability(i);
                 original.getMessage().setBody(p);
-                log.info("------------------->"+p);
                 
                 return original;
 

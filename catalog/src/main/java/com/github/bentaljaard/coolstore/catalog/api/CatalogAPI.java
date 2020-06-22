@@ -28,7 +28,7 @@ public class CatalogAPI {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Timed(name = "ProductListTimer", description = "A measure of how long it takes to retrieve a list of products", unit = MetricUnits.MILLISECONDS)
+    @Timed(name = "products.list.timer", description = "A measure of how long it takes to retrieve a list of products", unit = MetricUnits.MILLISECONDS)
     public Response listProducts() {
         return Response.ok(service.list()).header("instanceName", hostname ).build();
     }
