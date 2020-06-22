@@ -30,7 +30,7 @@ public class ProductGatewayRoute extends RouteBuilder {
                 .streamCaching("true")
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
                         
-                .recipientList(simple("{{catalog.endpoint}}/products?httpMethod=GET")).end()
+                .toD("{{catalog.endpoint}}/products?httpMethod=GET")
                 .log("**** Product service instance: ${headers.instanceName}")
                 
                 .choice()
@@ -56,17 +56,17 @@ public class ProductGatewayRoute extends RouteBuilder {
                 //Retrieve inventory for a product
                 from("direct:inventory")
                 .id("inventoryRoute")
-                .log("Inventory invoked")
+                .log("Inventory invoked to check availability for ${body.id}")
                 .streamCaching("true")
                 .setHeader("id", simple("${body.id}")) 
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
                         
-                .recipientList(simple("{{inventory.endpoint}}/availability/${header.id}?httpMethod=GET")).end()
+                .toD("{{inventory.endpoint}}/availability/${header.id}?httpMethod=GET")
                 .log("**** Inventory service instance: ${headers.instanceName}")
               
-                .log("${body}")
+                
                 .choice().when().simple("${body} == '' || ${body} == null")
-                        .log("No availability found for the product")
+                        .log("No availability found for the product ${header.id}")
                         .to("direct:inventoryFallback")              
                 .end()
                 .setHeader("CamelJacksonUnmarshalType", simple(Inventory.class.getName()))
@@ -93,7 +93,6 @@ public class ProductGatewayRoute extends RouteBuilder {
                 Inventory i = resource.getIn().getBody(Inventory.class);
                 p.setAvailability(i);
                 original.getMessage().setBody(p);
-                log.info("------------------->"+p);
                 
                 return original;
 
