@@ -66,7 +66,7 @@ public class ProductGatewayRoute extends RouteBuilder {
                 .setHeader("id", simple("${body.id}")) 
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
                 .circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(2000).end()        
-                        .toD("{{inventory.endpoint}}/availability/${header.id}?httpMethod=GET&socketTimeout=20005")
+                        .toD("{{inventory.endpoint}}/availability/${header.id}?httpMethod=GET")
                         .log("**** Inventory service instance: ${headers.instanceName}")
                 .onFallback()
                         .log("==== ${exception.message}")
