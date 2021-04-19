@@ -11,6 +11,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.apache.camel.component.jackson.ListJacksonDataFormat;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.apache.camel.spi.CircuitBreakerConstants;
 
 public class ProductGatewayRoute extends RouteBuilder {
 
@@ -30,9 +31,10 @@ public class ProductGatewayRoute extends RouteBuilder {
                 .streamCaching("true")
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
                         
-                .recipientList(simple("{{catalog.endpoint}}/products?httpMethod=GET")).end()
-                .log("**** Product service instance: ${headers.instanceName}")
-                
+                .circuitBreaker()       
+                        .toD("{{catalog.endpoint}}/products?httpMethod=GET")
+                        .log("**** Product service instance: ${headers.instanceName}")
+                .onFallback().to("direct:productFallback").end()
                 .choice()
                         .when(body().isNull()) 
                         //No products returned, default to fallback product
@@ -62,12 +64,17 @@ public class ProductGatewayRoute extends RouteBuilder {
                 .setHeader("id", simple("${body.id}")) 
                 .setBody(simple("null")).removeHeaders("CamelHttp*")
                         
-                .recipientList(simple("{{inventory.endpoint}}/availability/${header.id}?httpMethod=GET")).end()
-                .log("**** Inventory service instance: ${headers.instanceName}")
-              
-                .log("${body}")
+                .circuitBreaker().faultToleranceConfiguration().timeoutEnabled(true).timeoutDuration(2000).end()        
+                        .toD("{{inventory.endpoint}}/availability/${header.id}?httpMethod=GET")
+                        .log("**** Inventory service instance: ${headers.instanceName}")
+                .onFallback()
+                        .log("==== ${exception.message}")
+                        .log("==== CircuitBreakerOpen: ${exchangeProperty" + CircuitBreakerConstants.RESPONSE_SHORT_CIRCUITED + "}")
+                        .to("direct:inventoryFallback")
+                        .end()
+                
                 .choice().when().simple("${body} == '' || ${body} == null")
-                        .log("No availability found for the product")
+                        .log("No availability found for the product ${header.id}")
                         .to("direct:inventoryFallback")              
                 .end()
                 .setHeader("CamelJacksonUnmarshalType", simple(Inventory.class.getName()))
